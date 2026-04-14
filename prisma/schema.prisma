@@ -1,12 +1,12 @@
-// Prisma schema — add your models here once the hackathon prompt is known.
-// One person writes the full schema, runs the migration, then everyone branches.
+// Drift — Prisma schema
+// Every model: id String @id @default(cuid())  +  createdAt DateTime @default(now())
+// Run: npx prisma migrate dev --name <description>  after any change
+// Run: npx prisma generate                          after any change
 //
-// Rules:
-//   - Every model: id String @id @default(cuid())
-//   - Every model: createdAt DateTime @default(now())
-//   - Each group owns their own models — no group queries another group's tables
-//   - Run: npx prisma migrate dev --name <description>  after any change
-//   - Run: npx prisma generate  after any change
+// Table ownership:
+//   Group A  →  User
+//   Group B  →  Encounter, FamiliarStranger
+//   Group C  →  Chat, Message
 
 generator client {
   provider = "prisma-client-js"
@@ -16,4 +16,65 @@ datasource db {
   provider = "postgresql"
 }
 
-// Add your models here
+// ─── Group A ─────────────────────────────────────────────────────────────────
+
+model User {
+  id          String   @id @default(cuid())
+  uuid        String   @unique   // anonymous BLE broadcast UUID
+  displayName String
+  bleEnabled  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// ─── Group B ─────────────────────────────────────────────────────────────────
+
+// One row per (observer, observed, calendar day). Deduped so sitting near
+// someone for hours only logs one encounter per day.
+model Encounter {
+  id           String   @id @default(cuid())
+  observerUuid String
+  observedUuid String
+  date         String   // "YYYY-MM-DD" — one encounter per day max
+  createdAt    DateTime @default(now())
+
+  @@unique([observerUuid, observedUuid, date])
+}
+
+// Derived view of familiar strangers — updated by Group B's encounter engine.
+// encounterCount = number of distinct days two UUIDs were seen together.
+// chatUnlocked   = true when encounterCount >= 5
+model FamiliarStranger {
+  id             String   @id @default(cuid())
+  userUuid       String
+  strangerUuid   String
+  encounterCount Int      @default(0)
+  nickname       String   // deterministic adjective+noun+emoji from UUID hash
+  status         String   // "Shadow" | "Silhouette" | "Almost Known"
+  chatUnlocked   Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@unique([userUuid, strangerUuid])
+}
+
+// ─── Group C ─────────────────────────────────────────────────────────────────
+
+model Chat {
+  id               String    @id @default(cuid())
+  participantAUuid String
+  participantBUuid String
+  revealedByA      Boolean   @default(false)
+  revealedByB      Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  messages         Message[]
+
+  @@unique([participantAUuid, participantBUuid])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  chatId     String
+  senderUuid String
+  content    String
+  createdAt  DateTime @default(now())
+  chat       Chat     @relation(fields: [chatId], references: [id])
+}
