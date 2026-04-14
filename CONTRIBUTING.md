@@ -2,16 +2,20 @@
 
 ## Who owns what
 
-| Group | Pages | API routes | Components | AI stubs |
-|-------|-------|------------|------------|----------|
-| A | `app/group-a/` | `app/api/group-a/` | `components/group-a/` | `groupAFeature` in `lib/ai/gemini.ts` |
-| B | `app/group-b/` | `app/api/group-b/` | `components/group-b/` | `groupBFeature` in `lib/ai/gemini.ts` |
-| C | `app/group-c/` | `app/api/group-c/` | `components/group-c/` | `groupCFeature` in `lib/ai/gemini.ts` |
+| Group | Pages | API routes | Components |
+|-------|-------|------------|------------|
+| A | `app/group-a/` | `app/api/group-a/` | `components/group-a/` |
+| B | `app/group-b/` | `app/api/group-b/` | `components/group-b/` |
+| C | `app/group-c/` | `app/api/group-c/` | `components/group-c/` |
 
-**Shared (everyone reads, one person changes at a time):**
-- `prisma/schema.prisma` — coordinate schema changes before migrating
-- `lib/db/prisma.ts` — don't modify; just import `prisma` from here
-- `app/layout.tsx` / `app/page.tsx` — shared shell
+> Folder names will be renamed to match your project once the prompt is known.
+> Claude handles the renaming — see `CLAUDE.md`.
+
+**Shared (one person changes at a time):**
+- `prisma/schema.prisma` — agree on all models before anyone runs migrate
+- `lib/db/prisma.ts` — never modify; just `import { prisma }` from here
+- `app/layout.tsx` / `app/page.tsx` — Group A owns these
+- `lib/ai/gemini.ts` — Group B owns this, only if the project uses AI
 
 ## Setup
 
@@ -19,28 +23,32 @@
 git clone <repo-url>
 cd hackathon-skeleton
 npm install
-cp .env.example .env      # fill in DATABASE_URL and GEMINI_API_KEY
-npx prisma generate       # generate the Prisma client
-npx prisma migrate dev    # apply schema to your DB
-npm run dev               # http://localhost:3000
+cp .env.example .env        # fill in DATABASE_URL, DIRECT_URL, GEMINI_API_KEY
+npx prisma generate         # generate the Prisma client
+npm run dev                 # http://localhost:3000
 ```
 
 ## Branch workflow
 
+Each group works on their own branch and never edits files outside their column.
+
 ```
-main  ←  develop  ←  feature/group-a-checkin
-                  ←  feature/group-b-session
-                  ←  feature/group-c-dashboard
+main  ←  group-a
+      ←  group-b
+      ←  group-c
 ```
 
-1. Branch off `develop` — name it `feature/<group>-<feature>`
-2. Open a PR into `develop`, get 1 approval
-3. Never push directly to `main`
+1. Check out your branch: `git checkout group-a` (or b / c)
+2. Work only inside your group's folders
+3. Push regularly: `git push origin group-a`
+4. When done, tell the project owner — they merge all three into main
 
 ## Database changes
 
 If you need to add or change a model in `prisma/schema.prisma`:
-1. Tell the team in Slack/Discord so nobody is running a migration at the same time
+1. Tell the team so nobody runs a migration at the same time
 2. Edit the schema
 3. `npx prisma migrate dev --name <short-description>`
-4. Commit the generated migration file alongside your schema change
+4. `npx prisma generate`
+5. Commit the migration file alongside the schema change and push to `main`
+6. Everyone else pulls `main` and runs `npx prisma generate`
