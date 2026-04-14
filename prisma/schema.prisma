@@ -1,5 +1,12 @@
-// Prisma schema — replace this with your actual data models for the hackathon
-// Run: npx prisma migrate dev --name init   (after filling in DATABASE_URL)
+// Prisma schema — add your models here once the hackathon prompt is known.
+// One person writes the full schema, runs the migration, then everyone branches.
+//
+// Rules:
+//   - Every model: id String @id @default(cuid())
+//   - Every model: createdAt DateTime @default(now())
+//   - Each group owns their own models — no group queries another group's tables
+//   - Run: npx prisma migrate dev --name <description>  after any change
+//   - Run: npx prisma generate  after any change
 
 generator client {
   provider = "prisma-client-js"
@@ -9,17 +16,4 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── Example models — delete and replace with your own ───────────────────────
-
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-}
-
-enum Role {
-  USER
-  ADMIN
-}
+// Add your models here
