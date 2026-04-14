@@ -82,7 +82,7 @@ Claude will read the `CLAUDE.md` in this repo, check out your branch, and start 
 | `app/group-c/` | ❌ | ❌ | ✅ |
 | `app/api/group-c/` | ❌ | ❌ | ✅ |
 | `components/group-c/` | ❌ | ❌ | ✅ |
-| `lib/ai/gemini.ts` | ❌ | ✅ | ❌ |
+| `lib/ai/gemini.ts` | ❌ | ✅ (only if AI needed) | ❌ |
 | `app/page.tsx` + `app/layout.tsx` | ✅ | ❌ | ❌ |
 | `prisma/schema.prisma` | 🔒 coordinate with team | | |
 
