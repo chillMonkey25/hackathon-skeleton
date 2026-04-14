@@ -18,8 +18,12 @@ Each feature works on its own. Merging is automatic because there is nothing to 
 
 > Folder names are renamed to match your project once the prompt is known.
 
-**Shared (read-only for everyone, one person sets up):**
-- `prisma/schema.prisma` — agreed on Day 1, one person migrates
+**The only shared resource is the Supabase database** — one instance, same connection
+strings for everyone. Each group has their own tables inside it. Nobody touches another
+group's tables.
+
+**Shared files (one person sets up on Day 1, nobody changes after):**
+- `prisma/schema.prisma` — full schema agreed as a team, one person migrates
 - `lib/db/prisma.ts` — never modify, just `import { prisma }` from here
 - `app/layout.tsx` / `app/page.tsx` — Group A owns these
 - `lib/ai/gemini.ts` — Group B owns this, only if the project uses AI

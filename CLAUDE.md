@@ -20,14 +20,17 @@ Each group's feature must work on its own without any other group's code being p
 
 - No group imports components from another group's folder
 - No group calls another group's API routes via fetch
-- No group reads from a table that another group writes to
-- Each group owns its own tables end to end: they create, read, update, and delete their own data
+- No group reads from or writes to a table that another group owns
 
-The only things shared across groups are:
-- `lib/db/prisma.ts` — the database client (never modify, just import)
+**The only shared resource is the Supabase database itself** — one database, one set of
+connection strings (`DATABASE_URL` / `DIRECT_URL`), shared by all three groups.
+Within that database, each group owns their own tables completely.
+The schema is agreed on Day 1, one person migrates it, and then everyone just builds against their own tables.
+
+The only other shared files are:
+- `lib/db/prisma.ts` — the database client singleton (never modify, just import)
 - `prisma/schema.prisma` — agreed on Day 1 before anyone branches
 - `app/layout.tsx` / `app/page.tsx` — Group A owns the nav shell and landing page
-- A single shared `User` table if authentication is needed (agreed on Day 1)
 
 ---
 
