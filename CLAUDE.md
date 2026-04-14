@@ -5,7 +5,8 @@
 ## What this repo is
 
 A reusable Next.js + Prisma + Supabase + Gemini skeleton pre-wired for a 3-person hackathon team.
-The folder structure is pre-split so each person owns a distinct area with zero overlap.
+The folder structure is pre-split so each person owns a completely distinct set of files.
+**No two branches ever touch the same file — so merging all three into main produces zero conflicts.**
 
 **Stack:** Next.js 16 (App Router, TypeScript), Tailwind CSS, Prisma 7, PostgreSQL on Supabase, Google Gemini API, Recharts
 
@@ -13,73 +14,161 @@ The folder structure is pre-split so each person owns a distinct area with zero 
 
 ## When you receive a hackathon prompt
 
-Do the following automatically — do not wait to be asked:
-
-### 1. Analyse the prompt and identify three workstreams
-
-Split the project into exactly three groups along these lines:
-
-| Group | Default responsibility | Owns |
-|-------|----------------------|------|
-| **Group A** | User-facing forms and input flows | `app/group-a/`, `app/api/group-a/`, `components/group-a/` |
-| **Group B** | AI/backend processing and data pipelines | `app/group-b/`, `app/api/group-b/`, `components/group-b/`, `lib/ai/gemini.ts` stubs |
-| **Group C** | Dashboard, data visualisation, and alerting | `app/group-c/`, `app/api/group-c/`, `components/group-c/` |
-
-Adapt the split to the actual prompt. The goal is:
-- Each group can work in parallel with minimal merge conflicts
-- Each group has a clear deliverable they can demo independently
-- Group A finishes slightly earlier and can help Group C
-
-### 2. Output a concrete work breakdown
-
-For each group produce:
-- **What they build** — specific pages, API routes, components, and DB tables
-- **File paths they own** — exact directories from the table above, renamed to match the feature
-- **Dependencies on other groups** — what data/APIs they consume and from whom
-- **Week-by-week tasks** — 4 weeks: Foundation → Connect → Intelligence → Polish
-
-### 3. Rename the placeholder folders to match the project
-
-The skeleton uses `group-a`, `group-b`, `group-c` as placeholders.
-Rename them to reflect the actual feature areas, e.g.:
-- `group-a` → `patient` or `user` or `intake`
-- `group-b` → `session` or `engine` or `pipeline`
-- `group-c` → `dashboard` or `analytics` or `admin`
-
-List the exact `git mv` commands for the team to run.
-
-### 4. Update the schema
-
-Based on the prompt, propose the Prisma models that go in `prisma/schema.prisma`.
-Follow these rules:
-- Every model uses `id String @id @default(cuid())`
-- Every model gets `createdAt DateTime @default(now())`
-- Join tables get a `@@unique` constraint on the pair of foreign keys
-- Optional AI output fields use `Json?` or `String?` — never block a record creation on AI processing
-- Tell the team which group owns each model and which group only reads it
-
-### 5. Update the Gemini stubs
-
-In `lib/ai/gemini.ts`, rename and describe the three stub functions to match the project:
-- One stub per group that needs AI
-- Each stub must have a comment describing exactly what prompt it should send and what JSON it should return
-- Leave the implementation as `throw new Error("Not implemented")` — the group fills it in
-
-### 6. Produce the CONTRIBUTING.md ownership table
-
-Rewrite `CONTRIBUTING.md` with the actual folder names, model ownership, and branch naming convention for this specific project.
+Do ALL of the following automatically — do not wait to be asked.
 
 ---
 
-## Shared files — coordinate before touching
+### Step 1 — Analyse the prompt and define three workstreams
 
-| File | Who coordinates |
-|------|----------------|
-| `prisma/schema.prisma` | Agree on models before anyone runs `migrate` |
-| `prisma.config.ts` | Do not modify after setup |
-| `lib/db/prisma.ts` | Do not modify — just import `prisma` |
-| `app/layout.tsx` | Group A typically owns the nav shell |
-| `app/page.tsx` | Group A owns the landing/role switcher |
+Split the project into exactly three groups. Default split:
+
+| Group | Default responsibility |
+|-------|----------------------|
+| **Group A** | User-facing forms, input flows, landing page, navigation |
+| **Group B** | AI/backend processing, data pipelines, Gemini integration |
+| **Group C** | Dashboard, data visualisation, alerts, clinician/admin views |
+
+Adapt this to the actual prompt. Every feature must belong to exactly one group — no shared ownership.
+
+---
+
+### Step 2 — Create the three branches immediately
+
+Run these commands before writing any code:
+
+```bash
+git checkout main
+git pull origin main
+
+git checkout -b group-a
+git push -u origin group-a
+
+git checkout main
+git checkout -b group-b
+git push -u origin group-b
+
+git checkout main
+git checkout -b group-c
+git push -u origin group-c
+```
+
+Each group member clones the repo and checks out their branch:
+```bash
+git checkout group-a   # or group-b / group-c
+```
+
+They work exclusively on their branch and never touch another group's files.
+
+---
+
+### Step 3 — Rename placeholder folders to match the project
+
+The skeleton uses `group-a`, `group-b`, `group-c` as placeholders. Rename them to reflect the actual features, for example:
+- `group-a` → `patient`, `user`, `intake`, `onboarding`
+- `group-b` → `session`, `engine`, `pipeline`, `ai`
+- `group-c` → `dashboard`, `analytics`, `admin`, `clinician`
+
+Provide the exact commands, run these on `main` before the branches are created:
+
+```bash
+git mv app/group-a app/<feature-a>
+git mv app/api/group-a app/api/<feature-a>
+git mv components/group-a components/<feature-a>
+
+git mv app/group-b app/<feature-b>
+git mv app/api/group-b app/api/<feature-b>
+git mv components/group-b components/<feature-b>
+
+git mv app/group-c app/<feature-c>
+git mv app/api/group-c app/api/<feature-c>
+git mv components/group-c components/<feature-c>
+
+git commit -m "rename placeholder folders to match project"
+git push origin main
+```
+
+Then create the branches from the updated main.
+
+---
+
+### Step 4 — Enforce strict file ownership (the no-conflict guarantee)
+
+This is what makes zero merge conflicts possible. Each group ONLY touches files in their column:
+
+| File / folder | Group A | Group B | Group C |
+|--------------|---------|---------|---------|
+| `app/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
+| `app/api/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
+| `components/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
+| `app/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
+| `app/api/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
+| `components/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
+| `app/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
+| `app/api/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
+| `components/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
+| `lib/ai/gemini.ts` | ❌ never | ✅ owns | ❌ never |
+| `app/page.tsx` | ✅ owns | ❌ never | ❌ never |
+| `app/layout.tsx` | ✅ owns | ❌ never | ❌ never |
+| `prisma/schema.prisma` | 🔒 coordinate | 🔒 coordinate | 🔒 coordinate |
+| `lib/db/prisma.ts` | ❌ never modify | ❌ never modify | ❌ never modify |
+
+**Cross-group data access rule:** Groups B and C consume Group A's data only through API routes
+(`/api/<feature-a>/`). They call the API — they never import Group A's components or directly
+query tables that Group A owns.
+
+**Schema changes rule:** Only ONE person updates `prisma/schema.prisma` at a time.
+Agree on the full schema on day one, commit it to `main`, then everyone pulls before branching.
+After that, schema changes go through a PR that all three members review before merging.
+
+---
+
+### Step 5 — Design the Prisma schema
+
+Based on the prompt, write out every model needed. Rules:
+- Every model: `id String @id @default(cuid())` and `createdAt DateTime @default(now())`
+- Join tables: `@@unique([fieldA, fieldB])`
+- AI output fields: `Json?` or `String?` — never block record creation on AI processing
+- Label each model with which group **writes** it and which groups **read** it
+- Commit the final schema to `main` before anyone creates their branch
+
+---
+
+### Step 6 — Write the Gemini stubs for Group B
+
+In `lib/ai/gemini.ts`, replace the placeholder stubs with functions named for the actual project.
+For each function:
+- Name it after what it does (e.g. `extractSessionSignals`, `generateAlertMessage`)
+- Add a comment block describing: the input, the exact JSON shape to return, and any context to include in the prompt
+- Leave the body as `throw new Error("Not implemented — Group B owns this")`
+- Commit these named stubs to `main` so Groups A and C know what to call
+
+---
+
+### Step 7 — Output the work breakdown for each group
+
+For each group produce:
+- **What they build** — bullet list of specific pages, API routes, and components
+- **Files they create** — exact paths, no overlap with other groups
+- **Files they read but never edit** — API routes from other groups they call via `fetch`
+- **Week-by-week tasks** across the hackathon timeline
+
+---
+
+### Step 8 — Write the merge instructions
+
+At the end of the project, merging is done in this order with zero conflicts because no files overlap:
+
+```bash
+# Merge all three branches into main
+git checkout main
+git merge group-a --no-ff -m "merge group-a"
+git merge group-b --no-ff -m "merge group-b"
+git merge group-c --no-ff -m "merge group-c"
+git push origin main
+```
+
+If a conflict does appear, it means a group edited a file outside their column — identify which file,
+revert that change on the offending branch, and re-merge.
 
 ---
 
@@ -95,26 +184,12 @@ Rewrite `CONTRIBUTING.md` with the actual folder names, model ownership, and bra
 
 ## Environment variables
 
-Every teammate needs a `.env` file. They copy `.env.example` and fill in:
-1. `DATABASE_URL` — pooled Supabase URL (get from project owner)
-2. `DIRECT_URL` — direct Supabase URL (get from project owner)
-3. `GEMINI_API_KEY` — their own key from Google AI Studio (free)
+Every teammate copies `.env.example` to `.env` and fills in:
+1. `DATABASE_URL` — get the pooled URL from the project owner
+2. `DIRECT_URL` — get the direct URL from the project owner
+3. `GEMINI_API_KEY` — each person gets their own free key at aistudio.google.com
 
-Never commit `.env`. It is gitignored.
-
----
-
-## Branch workflow
-
-```
-main  ←  develop  ←  feature/group-a-<feature>
-                  ←  feature/group-b-<feature>
-                  ←  feature/group-c-<feature>
-```
-
-- Branch off `develop`
-- 1 PR approval required to merge back
-- Never push directly to `main`
+Never commit `.env` — it is gitignored.
 
 ---
 

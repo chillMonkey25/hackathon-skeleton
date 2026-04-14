@@ -1,8 +1,5 @@
 // Seed script — run with:  npx prisma db seed
-// Add `"prisma": { "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts" }`
-// to package.json if not already there.
-
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../node_modules/.prisma/client";
 
 const prisma = new PrismaClient();
 
