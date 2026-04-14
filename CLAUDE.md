@@ -5,191 +5,172 @@
 ## What this repo is
 
 A reusable Next.js + Prisma + Supabase + Gemini skeleton pre-wired for a 3-person hackathon team.
-The folder structure is pre-split so each person owns a completely distinct set of files.
-**No two branches ever touch the same file — so merging all three into main produces zero conflicts.**
+Each person clones this repo, tells Claude which group they are, pastes the hackathon prompt,
+and Claude builds only that group's portion of the app on the correct branch.
+All three branches merge into main at the end with zero conflicts.
 
 **Stack:** Next.js 16 (App Router, TypeScript), Tailwind CSS, Prisma 7, PostgreSQL on Supabase, Google Gemini API, Recharts
 
 ---
 
-## When you receive a hackathon prompt
+## When a teammate opens this repo and gives you a prompt
 
-Do ALL of the following automatically — do not wait to be asked.
+### Step 1 — Identify the group
 
----
+The user will say something like "I am Group A" or "I'm working on Group B".
+If they do not say which group they are, **ask them before doing anything else**:
 
-### Step 1 — Analyse the prompt and define three workstreams
+> "Which group are you — A, B, or C?"
 
-Split the project into exactly three groups. Default split:
+Do not write any code until you know the group.
 
-| Group | Default responsibility |
-|-------|----------------------|
-| **Group A** | User-facing forms, input flows, landing page, navigation |
-| **Group B** | AI/backend processing, data pipelines, Gemini integration |
-| **Group C** | Dashboard, data visualisation, alerts, clinician/admin views |
+### Step 2 — Check out and confirm the correct branch
 
-Adapt this to the actual prompt. Every feature must belong to exactly one group — no shared ownership.
+Run the following immediately:
 
----
+```bash
+git fetch origin
+git checkout group-a    # or group-b / group-c depending on what they said
+git pull origin group-a # pull latest in case teammates pushed
+```
 
-### Step 2 — Create the three branches immediately
-
-Run these commands before writing any code:
+Confirm out loud which branch you are on before writing any code.
+If the branch does not exist yet, create it from main:
 
 ```bash
 git checkout main
 git pull origin main
-
 git checkout -b group-a
 git push -u origin group-a
-
-git checkout main
-git checkout -b group-b
-git push -u origin group-b
-
-git checkout main
-git checkout -b group-c
-git push -u origin group-c
 ```
 
-Each group member clones the repo and checks out their branch:
+### Step 3 — Identify what this group builds from the prompt
+
+Read the hackathon prompt and map it to the group's responsibility:
+
+| Group | Default responsibility |
+|-------|----------------------|
+| **Group A** | User-facing forms, input flows, landing page, navigation shell |
+| **Group B** | AI/Gemini integration, backend processing, data pipelines |
+| **Group C** | Dashboard, data visualisation (Recharts), alerts, admin/clinician views |
+
+State clearly what this group will build before starting. If something is ambiguous, ask.
+
+### Step 4 — Rename placeholder folders if not already done
+
+If the folders are still named `group-a`, `group-b`, `group-c`, rename them on `main` first
+(coordinate with the team — only one person does this):
+
 ```bash
-git checkout group-a   # or group-b / group-c
-```
-
-They work exclusively on their branch and never touch another group's files.
-
----
-
-### Step 3 — Rename placeholder folders to match the project
-
-The skeleton uses `group-a`, `group-b`, `group-c` as placeholders. Rename them to reflect the actual features, for example:
-- `group-a` → `patient`, `user`, `intake`, `onboarding`
-- `group-b` → `session`, `engine`, `pipeline`, `ai`
-- `group-c` → `dashboard`, `analytics`, `admin`, `clinician`
-
-Provide the exact commands, run these on `main` before the branches are created:
-
-```bash
-git mv app/group-a app/<feature-a>
-git mv app/api/group-a app/api/<feature-a>
-git mv components/group-a components/<feature-a>
-
-git mv app/group-b app/<feature-b>
-git mv app/api/group-b app/api/<feature-b>
-git mv components/group-b components/<feature-b>
-
-git mv app/group-c app/<feature-c>
-git mv app/api/group-c app/api/<feature-c>
-git mv components/group-c components/<feature-c>
-
-git commit -m "rename placeholder folders to match project"
+git checkout main
+git mv app/group-a app/<feature-name>
+git mv app/api/group-a app/api/<feature-name>
+git mv components/group-a components/<feature-name>
+git commit -m "rename group-a folders to <feature-name>"
 git push origin main
+git checkout group-a
+git merge main
 ```
 
-Then create the branches from the updated main.
+### Step 5 — Build only inside the group's files
 
----
-
-### Step 4 — Enforce strict file ownership (the no-conflict guarantee)
-
-This is what makes zero merge conflicts possible. Each group ONLY touches files in their column:
+**This is the rule that guarantees zero merge conflicts.**
+Only ever create or edit files inside the group's assigned columns:
 
 | File / folder | Group A | Group B | Group C |
 |--------------|---------|---------|---------|
-| `app/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
-| `app/api/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
-| `components/<feature-a>/` | ✅ owns | ❌ never | ❌ never |
-| `app/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
-| `app/api/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
-| `components/<feature-b>/` | ❌ never | ✅ owns | ❌ never |
-| `app/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
-| `app/api/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
-| `components/<feature-c>/` | ❌ never | ❌ never | ✅ owns |
+| `app/group-a/` (or renamed) | ✅ owns | ❌ never | ❌ never |
+| `app/api/group-a/` (or renamed) | ✅ owns | ❌ never | ❌ never |
+| `components/group-a/` (or renamed) | ✅ owns | ❌ never | ❌ never |
+| `app/group-b/` (or renamed) | ❌ never | ✅ owns | ❌ never |
+| `app/api/group-b/` (or renamed) | ❌ never | ✅ owns | ❌ never |
+| `components/group-b/` (or renamed) | ❌ never | ✅ owns | ❌ never |
+| `app/group-c/` (or renamed) | ❌ never | ❌ never | ✅ owns |
+| `app/api/group-c/` (or renamed) | ❌ never | ❌ never | ✅ owns |
+| `components/group-c/` (or renamed) | ❌ never | ❌ never | ✅ owns |
 | `lib/ai/gemini.ts` | ❌ never | ✅ owns | ❌ never |
-| `app/page.tsx` | ✅ owns | ❌ never | ❌ never |
-| `app/layout.tsx` | ✅ owns | ❌ never | ❌ never |
-| `prisma/schema.prisma` | 🔒 coordinate | 🔒 coordinate | 🔒 coordinate |
-| `lib/db/prisma.ts` | ❌ never modify | ❌ never modify | ❌ never modify |
+| `app/page.tsx` | ✅ Group A only | ❌ never | ❌ never |
+| `app/layout.tsx` | ✅ Group A only | ❌ never | ❌ never |
+| `prisma/schema.prisma` | 🔒 coordinate — one person at a time | | |
+| `lib/db/prisma.ts` | ❌ never modify — just import `prisma` | | |
 
-**Cross-group data access rule:** Groups B and C consume Group A's data only through API routes
-(`/api/<feature-a>/`). They call the API — they never import Group A's components or directly
-query tables that Group A owns.
+**Cross-group data rule:** Groups B and C consume other groups' data only by calling their
+API routes via `fetch('/api/group-a/...')`. They never directly import another group's components
+or write queries against tables another group owns.
 
-**Schema changes rule:** Only ONE person updates `prisma/schema.prisma` at a time.
-Agree on the full schema on day one, commit it to `main`, then everyone pulls before branching.
-After that, schema changes go through a PR that all three members review before merging.
+### Step 6 — After each significant piece of work, verify no errors
 
----
-
-### Step 5 — Design the Prisma schema
-
-Based on the prompt, write out every model needed. Rules:
-- Every model: `id String @id @default(cuid())` and `createdAt DateTime @default(now())`
-- Join tables: `@@unique([fieldA, fieldB])`
-- AI output fields: `Json?` or `String?` — never block record creation on AI processing
-- Label each model with which group **writes** it and which groups **read** it
-- Commit the final schema to `main` before anyone creates their branch
-
----
-
-### Step 6 — Write the Gemini stubs for Group B
-
-In `lib/ai/gemini.ts`, replace the placeholder stubs with functions named for the actual project.
-For each function:
-- Name it after what it does (e.g. `extractSessionSignals`, `generateAlertMessage`)
-- Add a comment block describing: the input, the exact JSON shape to return, and any context to include in the prompt
-- Leave the body as `throw new Error("Not implemented — Group B owns this")`
-- Commit these named stubs to `main` so Groups A and C know what to call
-
----
-
-### Step 7 — Output the work breakdown for each group
-
-For each group produce:
-- **What they build** — bullet list of specific pages, API routes, and components
-- **Files they create** — exact paths, no overlap with other groups
-- **Files they read but never edit** — API routes from other groups they call via `fetch`
-- **Week-by-week tasks** across the hackathon timeline
-
----
-
-### Step 8 — Write the merge instructions
-
-At the end of the project, merging is done in this order with zero conflicts because no files overlap:
+Run these before committing:
 
 ```bash
-# Merge all three branches into main
+npx tsc --noEmit
+```
+
+Fix every type error before moving on. Do not leave broken code on the branch.
+
+### Step 7 — Commit frequently to the group's branch
+
+```bash
+git add <only files in this group's folders>
+git commit -m "group-a: <short description>"
+git push origin group-a
+```
+
+Never use `git add .` or `git add -A` — always add specific files to avoid accidentally
+staging files outside the group's ownership column.
+
+### Step 8 — Before declaring the group's work done, run the full check
+
+```bash
+npx tsc --noEmit          # zero type errors required
+npm run build 2>&1 | tail -20   # must complete without error
+```
+
+Only tell the user their work is ready to merge once both pass cleanly.
+
+### Step 9 — Merge instructions (project owner runs this at the end)
+
+```bash
 git checkout main
+git pull origin main
 git merge group-a --no-ff -m "merge group-a"
 git merge group-b --no-ff -m "merge group-b"
 git merge group-c --no-ff -m "merge group-c"
 git push origin main
 ```
 
-If a conflict does appear, it means a group edited a file outside their column — identify which file,
-revert that change on the offending branch, and re-merge.
+If a conflict appears, it means a file was edited outside its ownership column.
+Identify the file, check which group modified it, revert that change on the offending branch,
+and re-merge.
 
 ---
 
-## Database setup (already done — do not repeat)
+## When you are the project owner setting up from scratch
+
+Run these steps once on `main` before teammates clone:
+
+1. Rename placeholder folders to match the project (see Step 4 above)
+2. Write the full Prisma schema — all models, relationships, and ownership labels
+3. Run `npx prisma migrate dev --name init` to push schema to Supabase
+4. Write named Gemini stubs in `lib/ai/gemini.ts` for Group B
+5. Commit everything to `main` and push
+6. Create the three branches from main and push them:
+   ```bash
+   git checkout -b group-a && git push -u origin group-a && git checkout main
+   git checkout -b group-b && git push -u origin group-b && git checkout main
+   git checkout -b group-c && git push -u origin group-c && git checkout main
+   ```
+7. Share the repo URL and the `.env` values with teammates
+
+---
+
+## Database setup (already done for this project)
 
 - Supabase project: `hnpluqjszthcryxgcuvm`
 - Region: `aws-1-us-west-2`
-- `DATABASE_URL` → pooled connection (port 6543, pgbouncer=true) — used at runtime
-- `DIRECT_URL` → direct connection (port 5432) — used only by `prisma migrate`
-- Schema is already migrated. Run `npx prisma migrate dev --name <change>` for any new models.
-
----
-
-## Environment variables
-
-Every teammate copies `.env.example` to `.env` and fills in:
-1. `DATABASE_URL` — get the pooled URL from the project owner
-2. `DIRECT_URL` — get the direct URL from the project owner
-3. `GEMINI_API_KEY` — each person gets their own free key at aistudio.google.com
-
-Never commit `.env` — it is gitignored.
+- `DATABASE_URL` → pooled connection (port 6543, pgbouncer=true) — runtime
+- `DIRECT_URL` → direct connection (port 5432) — migrations only
+- Schema already migrated. Run `npx prisma migrate dev --name <change>` for new models.
 
 ---
 
@@ -197,8 +178,9 @@ Never commit `.env` — it is gitignored.
 
 ```bash
 npm run dev                              # start dev server → http://localhost:3000
+npx tsc --noEmit                         # type-check without building
+npm run build                            # full production build check
 npx prisma migrate dev --name <name>     # apply schema changes to Supabase
 npx prisma generate                      # regenerate client after schema change
 npx prisma studio                        # local DB browser → http://localhost:5555
-npx tsc --noEmit                         # type-check without building
 ```

@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hackathon Skeleton
 
-## Getting Started
+Next.js · TypeScript · Tailwind · Prisma · Supabase · Gemini
 
-First, run the development server:
+---
+
+## For every teammate — do this first
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/chillMonkey25/hackathon-skeleton.git
+cd hackathon-skeleton
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up your environment variables
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and fill in every value. Get the database URLs from the **project owner** (do not share these in chat or commit them):
+
+```
+DATABASE_URL="..."     # get from project owner
+DIRECT_URL="..."       # get from project owner
+GEMINI_API_KEY="..."   # get your own free key at https://aistudio.google.com/app/apikey
+```
+
+> **Never commit `.env`** — it is already gitignored.
+
+### 4. Generate the Prisma client
+
+```bash
+npx prisma generate
+```
+
+### 5. Check out your group's branch
+
+```bash
+git checkout group-a   # if you are Group A
+git checkout group-b   # if you are Group B
+git checkout group-c   # if you are Group C
+```
+
+### 6. Start the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) — you should see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tell Claude which group you are
 
-## Learn More
+Once the dev server is running, open Claude Code in this folder and say:
 
-To learn more about Next.js, take a look at the following resources:
+> "I am Group A. Here is the hackathon prompt: [paste prompt]"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Claude will read the `CLAUDE.md` in this repo, check out your branch, and start building only your part of the app.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## File ownership — never edit outside your column
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Folder | Group A | Group B | Group C |
+|--------|---------|---------|---------|
+| `app/group-a/` | ✅ | ❌ | ❌ |
+| `app/api/group-a/` | ✅ | ❌ | ❌ |
+| `components/group-a/` | ✅ | ❌ | ❌ |
+| `app/group-b/` | ❌ | ✅ | ❌ |
+| `app/api/group-b/` | ❌ | ✅ | ❌ |
+| `components/group-b/` | ❌ | ✅ | ❌ |
+| `app/group-c/` | ❌ | ❌ | ✅ |
+| `app/api/group-c/` | ❌ | ❌ | ✅ |
+| `components/group-c/` | ❌ | ❌ | ✅ |
+| `lib/ai/gemini.ts` | ❌ | ✅ | ❌ |
+| `app/page.tsx` + `app/layout.tsx` | ✅ | ❌ | ❌ |
+| `prisma/schema.prisma` | 🔒 coordinate with team | | |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is what guarantees **zero merge conflicts** when all three branches are merged at the end.
+
+---
+
+## Merging at the end
+
+Once all three groups confirm their features work and pass type checks, the project owner runs:
+
+```bash
+git checkout main
+git merge group-a --no-ff -m "merge group-a"
+git merge group-b --no-ff -m "merge group-b"
+git merge group-c --no-ff -m "merge group-c"
+git push origin main
+```
+
+---
+
+## Useful commands
+
+```bash
+npm run dev                               # start dev server
+npx tsc --noEmit                          # type-check (run before merging)
+npx prisma migrate dev --name <name>      # apply a schema change to Supabase
+npx prisma generate                       # regenerate client after schema change
+npx prisma studio                         # browse the database at localhost:5555
+```
