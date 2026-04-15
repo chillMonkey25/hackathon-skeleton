@@ -19,11 +19,14 @@ datasource db {
 // ─── Group A ─────────────────────────────────────────────────────────────────
 
 model User {
-  id          String   @id @default(cuid())
-  uuid        String   @unique   // anonymous BLE broadcast UUID
-  displayName String
-  bleEnabled  Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id                String    @id @default(cuid())
+  uuid              String    @unique
+  displayName       String
+  bleEnabled        Boolean   @default(true)
+  latitude          Float?    // last known location
+  longitude         Float?
+  locationUpdatedAt DateTime? // when location was last sent
+  createdAt         DateTime  @default(now())
 }
 
 // ─── Group B ─────────────────────────────────────────────────────────────────
