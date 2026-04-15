@@ -1,90 +1,89 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import OrbitView from "@/components/group-b/OrbitView";
+import StrangerCard from "@/components/group-b/StrangerCard";
 
-export default function OnboardingPage() {
-  const [name, setName] = useState("")
-  const [going, setGoing] = useState(false)
-  const router = useRouter()
+type Stranger = {
+  id: string;
+  strangerUuid: string;
+  nickname: string;
+  encounterCount: number;
+  status: string;
+  chatUnlocked: boolean;
+};
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!name.trim()) return
-    localStorage.setItem("drift_display_name", name.trim())
-    setGoing(true)
-    router.push("/group-b/orbit")
-  }
+export default function OrbitPage() {
+  const [strangers, setStrangers] = useState<Stranger[]>([]);
+  const [uuid, setUuid] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const myUuid = localStorage.getItem("drift_uuid");
+    if (!myUuid) {
+      window.location.href = "/group-a";
+      return;
+    }
+    setUuid(myUuid);
+
+    fetch(`/api/group-b?uuid=${myUuid}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setStrangers(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
-    <main className="min-h-screen bg-[#0B0910] flex flex-col items-center justify-center px-8">
-      <style>{`
-        @keyframes ob-up {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .ob-1 { animation: ob-up 0.8s ease both; }
-        .ob-2 { animation: ob-up 0.8s ease 0.25s both; }
-        .ob-3 { animation: ob-up 0.8s ease 0.5s both; }
-
-        .drift-input::placeholder { color: #3A2F4D; }
-        .drift-input:focus { outline: none; border-bottom-color: #8B5CF6; }
-      `}</style>
-
-      <div className="w-full max-w-xs space-y-12">
-
-        {/* Logo */}
-        <div className="text-center ob-1">
-          <h1 className="text-4xl font-extralight tracking-[0.35em] text-[#F5ECD7]">drift</h1>
-          <p className="mt-3 text-[11px] tracking-[0.22em] text-[#6B5D4F] uppercase">
-            the people you keep almost meeting
-          </p>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-8 ob-2">
-          <div>
-            <label className="block text-[10px] tracking-[0.25em] uppercase text-[#6B5D4F] mb-4">
-              what should we call you?
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="your name"
-              autoFocus
-              className="drift-input w-full bg-transparent border-b border-[#2A1F3D] text-[#F5ECD7] text-lg py-2 transition-colors duration-200"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={!name.trim() || going}
-            className="w-full py-3 text-[11px] tracking-[0.25em] uppercase transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: going ? "#C49A3C" : "#F5ECD7",
-              color: "#0B0910",
-            }}
-            onMouseEnter={(e) => {
-              if (!going && name.trim())
-                (e.currentTarget as HTMLElement).style.backgroundColor = "#C49A3C"
-            }}
-            onMouseLeave={(e) => {
-              if (!going)
-                (e.currentTarget as HTMLElement).style.backgroundColor = "#F5ECD7"
-            }}
-          >
-            {going ? "stepping in…" : "step into the drift"}
-          </button>
-        </form>
-
-        {/* Fine print */}
-        <p className="text-center text-[10px] text-[#2A1F3D] leading-relaxed ob-3">
-          your identity stays anonymous
-          <br />
-          until you choose to reveal
-        </p>
+    <main className="flex min-h-screen flex-col items-center px-4 pb-16">
+      {/* Header */}
+      <div className="flex w-full max-w-sm items-center justify-between py-6">
+        <span className="text-sm font-bold tracking-widest text-[#F5ECD7]">drift</span>
+        <Link
+          href="/group-a/settings"
+          className="text-xs text-[#6B5D4F] transition hover:text-[#9B8B6E]"
+        >
+          settings
+        </Link>
       </div>
+
+      {loading ? (
+        <div className="mt-32 flex flex-col items-center gap-3">
+          <div className="h-2 w-2 rounded-full bg-[#C49A3C] animate-pulse" />
+          <p className="text-xs text-[#6B5D4F]">scanning...</p>
+        </div>
+      ) : strangers.length === 0 ? (
+        <div className="mt-24 flex flex-col items-center gap-6 text-center px-8">
+          <div className="h-2 w-2 rounded-full bg-[#3D3047]" />
+          <p className="text-sm text-[#9B8B6E] leading-relaxed">
+            no familiar strangers yet.<br />
+            drift notices patterns over time.
+          </p>
+          <Link
+            href="/group-a/settings"
+            className="text-xs text-[#C49A3C] underline"
+          >
+            seed demo data to see the full flow
+          </Link>
+        </div>
+      ) : (
+        <>
+          {/* Orbit visualization */}
+          <OrbitView strangers={strangers} />
+
+          {/* Stranger list */}
+          <div className="flex w-full max-w-sm flex-col gap-2 mt-4">
+            <p className="text-xs tracking-widest text-[#6B5D4F] uppercase mb-1">
+              {strangers.length} familiar {strangers.length === 1 ? "stranger" : "strangers"}
+            </p>
+            {strangers.map((s) => (
+              <StrangerCard key={s.id} {...s} />
+            ))}
+          </div>
+        </>
+      )}
     </main>
-  )
+  );
 }
